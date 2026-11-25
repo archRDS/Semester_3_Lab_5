@@ -7,17 +7,17 @@
 #include <vector>
 
 struct MarketplaceError {
-    const wchar_t* message;
+    const char* message;
 };
 
 struct Receipt {
-    std::wstring customerName;
-    std::wstring sellerName;
-    std::wstring productName;
+    std::string customerName;
+    std::string sellerName;
+    std::string productName;
     int quantity;
     Money unitPrice;
     Money total;
-    std::wstring paymentMethod;
+    std::string paymentMethod;
     Money remainingBalance;
 };
 
@@ -34,9 +34,9 @@ private:
     friend class Seller;
     friend class Customer;
 
-    std::size_t addSeller(std::wstring name);
-    std::size_t addCustomer(std::wstring name, Money balance);
-    std::size_t addProduct(const Seller& seller, std::wstring name, Money price, int quantity);
+    std::size_t addSeller(std::string name);
+    std::size_t addCustomer(std::string name, Money balance);
+    std::size_t addProduct(const Seller& seller, std::string name, Money price, int quantity);
     Receipt purchase(const Customer& customer, std::size_t productId, int quantity,
                      const PaymentStrategy& payment);
 

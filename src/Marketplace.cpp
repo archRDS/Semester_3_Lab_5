@@ -9,7 +9,7 @@
 namespace {
 template<class Participant>
 Participant& findParticipant(const std::vector<std::unique_ptr<Participant>>& participants,
-                             std::size_t id, const wchar_t* error) {
+                             std::size_t id, const char* error) {
     const auto found = std::find_if(participants.begin(), participants.end(), [id](const auto& user) {
         return user->id() == id;
     });
@@ -19,45 +19,45 @@ Participant& findParticipant(const std::vector<std::unique_ptr<Participant>>& pa
     return **found;
 }
 
-void validateName(const std::wstring& name, const wchar_t* error) {
-    if (name.find_first_not_of(L" \t\r\n") == std::wstring::npos) {
+void validateName(const std::string& name, const char* error) {
+    if (name.find_first_not_of(" \t\r\n") == std::string::npos) {
         throw MarketplaceError{error};
     }
 }
 }
 
 const Seller& Marketplace::seller(std::size_t id) const {
-    return findParticipant(sellers_, id, L"Продавец не найден.");
+    return findParticipant(sellers_, id, "Продавец не найден.");
 }
 
 const Customer& Marketplace::customer(std::size_t id) const {
-    return findParticipant(customers_, id, L"Покупатель не найден.");
+    return findParticipant(customers_, id, "Покупатель не найден.");
 }
 
-std::size_t Marketplace::addSeller(std::wstring name) {
-    validateName(name, L"Введите имя продавца.");
+std::size_t Marketplace::addSeller(std::string name) {
+    validateName(name, "Введите имя продавца.");
     auto seller = std::unique_ptr<Seller>(new Seller(nextUserId_, std::move(name)));
     sellers_.push_back(std::move(seller));
     return nextUserId_++;
 }
 
-std::size_t Marketplace::addCustomer(std::wstring name, Money balance) {
-    validateName(name, L"Введите имя покупателя.");
+std::size_t Marketplace::addCustomer(std::string name, Money balance) {
+    validateName(name, "Введите имя покупателя.");
     if (balance < 0) {
-        throw MarketplaceError{L"Баланс покупателя должен быть неотрицательным."};
+        throw MarketplaceError{"Баланс покупателя должен быть неотрицательным."};
     }
     auto customer = std::unique_ptr<Customer>(new Customer(nextUserId_, std::move(name), balance));
     customers_.push_back(std::move(customer));
     return nextUserId_++;
 }
 
-std::size_t Marketplace::addProduct(const Seller& owner, std::wstring name, Money price, int quantity) {
+std::size_t Marketplace::addProduct(const Seller& owner, std::string name, Money price, int quantity) {
     if (&seller(owner.id()) != &owner) {
-        throw MarketplaceError{L"Продавец не зарегистрирован на этой площадке."};
+        throw MarketplaceError{"Продавец не зарегистрирован на этой площадке."};
     }
-    validateName(name, L"Введите название товара.");
+    validateName(name, "Введите название товара.");
     if (price <= 0 || quantity <= 0) {
-        throw MarketplaceError{L"Цена и количество должны быть больше нуля."};
+        throw MarketplaceError{"Цена и количество должны быть больше нуля."};
     }
 
     const std::size_t id = products_.size() + 1;
@@ -67,33 +67,33 @@ std::size_t Marketplace::addProduct(const Seller& owner, std::wstring name, Mone
 
 Receipt Marketplace::purchase(const Customer& buyer, std::size_t productId, int quantity,
                               const PaymentStrategy& payment) {
-    auto& customer = findParticipant(customers_, buyer.id(), L"Покупатель не найден.");
+    auto& customer = findParticipant(customers_, buyer.id(), "Покупатель не найден.");
     if (&customer != &buyer) {
-        throw MarketplaceError{L"Покупатель не зарегистрирован на этой площадке."};
+        throw MarketplaceError{"Покупатель не зарегистрирован на этой площадке."};
     }
     if (productId == 0 || productId > products_.size()) {
-        throw MarketplaceError{L"Товар не найден."};
+        throw MarketplaceError{"Товар не найден."};
     }
     auto& product = products_[productId - 1];
     if (quantity <= 0) {
-        throw MarketplaceError{L"Количество должно быть больше нуля."};
+        throw MarketplaceError{"Количество должно быть больше нуля."};
     }
     if (quantity > product.quantity()) {
-        throw MarketplaceError{L"На складе недостаточно товара."};
+        throw MarketplaceError{"На складе недостаточно товара."};
     }
     if (product.price() > std::numeric_limits<Money>::max() / quantity) {
-        throw MarketplaceError{L"Сумма покупки слишком велика."};
+        throw MarketplaceError{"Сумма покупки слишком велика."};
     }
 
     const Money total = product.price() * quantity;
     if (customer.balance() < total) {
-        throw MarketplaceError{L"На балансе покупателя недостаточно средств."};
+        throw MarketplaceError{"На балансе покупателя недостаточно средств."};
     }
 
     Receipt receipt{buyer.name(), seller(product.sellerId()).name(), product.name(), quantity,
                     product.price(), total, payment.name(), buyer.balance()};
     if (!payment.pay(receipt.remainingBalance, total)) {
-        throw MarketplaceError{L"Оплата не прошла."};
+        throw MarketplaceError{"Оплата не прошла."};
     }
 
     customer.balance_ = receipt.remainingBalance;

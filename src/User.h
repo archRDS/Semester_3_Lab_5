@@ -13,25 +13,25 @@ class User {
 public:
     virtual ~User() = default;
     std::size_t id() const noexcept { return id_; }
-    const std::wstring& name() const noexcept { return name_; }
+    const std::string& name() const noexcept { return name_; }
 
     User(const User&) = delete;
     User& operator=(const User&) = delete;
 
 protected:
-    User(std::size_t id, std::wstring name);
+    User(std::size_t id, std::string name);
 
 private:
     std::size_t id_;
-    std::wstring name_;
+    std::string name_;
 };
 
 class Superuser final : public User {
 public:
     static const Superuser& instance();
 
-    std::size_t addSeller(Marketplace& market, std::wstring name) const;
-    std::size_t addCustomer(Marketplace& market, std::wstring name, Money balance) const;
+    std::size_t addSeller(Marketplace& market, std::string name) const;
+    std::size_t addCustomer(Marketplace& market, std::string name, Money balance) const;
 
 private:
     Superuser();
@@ -39,11 +39,11 @@ private:
 
 class Seller final : public User {
 public:
-    std::size_t add_product(Marketplace& market, std::wstring name, Money price, int quantity) const;
+    std::size_t add_product(Marketplace& market, std::string name, Money price, int quantity) const;
 
 private:
     friend class Marketplace;
-    Seller(std::size_t id, std::wstring name);
+    Seller(std::size_t id, std::string name);
 };
 
 class Customer final : public User {
@@ -54,7 +54,7 @@ public:
 
 private:
     friend class Marketplace;
-    Customer(std::size_t id, std::wstring name, Money balance);
+    Customer(std::size_t id, std::string name, Money balance);
 
     Money balance_;
 };

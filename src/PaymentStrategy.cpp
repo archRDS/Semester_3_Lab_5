@@ -8,24 +8,24 @@ bool PaymentStrategy::debit(Money& balance, Money amount) noexcept {
     return true;
 }
 
-const wchar_t* CashPayment::name() const noexcept {
-    return L"Наличные";
+const char* CashPayment::name() const noexcept {
+    return "Наличные";
 }
 
 bool CashPayment::pay(Money& balance, Money amount) const noexcept {
     return debit(balance, amount);
 }
 
-const wchar_t* CardPayment::name() const noexcept {
-    return L"Банковская карта";
+const char* CardPayment::name() const noexcept {
+    return "Банковская карта";
 }
 
 bool CardPayment::pay(Money& balance, Money amount) const noexcept {
     return debit(balance, amount);
 }
 
-const wchar_t* CryptoPayment::name() const noexcept {
-    return L"Криптовалюта";
+const char* CryptoPayment::name() const noexcept {
+    return "Криптовалюта";
 }
 
 bool CryptoPayment::pay(Money& balance, Money amount) const noexcept {
